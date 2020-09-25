@@ -17,7 +17,7 @@ interface Attribute {
 interface Request {
   name: string;
   sku: string;
-  description: string;
+  description?: string;
   price: number;
   product_type_id: string;
   brand_id: string;
@@ -75,40 +75,38 @@ class CreateProductService {
       brand_id,
     });
 
-    const attributesValuesPromise = attributes.map(async attribute => {
-      const attributeData = await productAttributesRepository.findOne(
-        attribute.id,
+    if (attributes) {
+      const attributesValuesPromise = attributes.map(async attribute => {
+        const attributeData = await productAttributesRepository.findOne(
+          attribute.id,
+        );
+
+        if (!attributeData) {
+          throw new AppError('Invalid attribute');
+        }
+
+        if (product.product_type_id !== attributeData.product_type_id) {
+          throw new AppError('Incorrect product type');
+        }
+
+        const attributeValues = await productAttributeValuesRepository.findByIds(
+          attribute.values_ids,
+        );
+
+        if (!attributeValues) {
+          throw new AppError('Incorrect attribute value');
+        }
+
+        return attributeValues;
+      });
+
+      const attributesValues = await Promise.all(attributesValuesPromise);
+
+      const attributesValuesReduced = attributesValues.reduce((arr, e) =>
+        arr.concat(e),
       );
 
-      if (!attributeData) {
-        throw new AppError('Invalid attribute');
-      }
-
-      if (product.product_type_id !== attributeData.product_type_id) {
-        throw new AppError('Incorrect product type');
-      }
-
-      const attributeValues = await productAttributeValuesRepository.findByIds(
-        attribute.values_ids,
-      );
-
-      if (!attributeValues) {
-        throw new AppError('Incorrect attribute value');
-      }
-
-      return attributeValues;
-    });
-
-    const attributesValues = await Promise.all(attributesValuesPromise);
-
-    const attributesValuesReduced = attributesValues.reduce((arr, e) =>
-      arr.concat(e),
-    );
-
-    if (!product.productAttributeValues) {
       product.productAttributeValues = attributesValuesReduced;
-    } else {
-      product.productAttributeValues.push(...attributesValuesReduced);
     }
 
     await productsRepository.save(product);
