@@ -105,7 +105,11 @@ class CreateProductService {
       arr.concat(e),
     );
 
-    product.productAttributeValues = attributesValuesReduced;
+    if (!product.productAttributeValues) {
+      product.productAttributeValues = attributesValuesReduced;
+    } else {
+      product.productAttributeValues.push(...attributesValuesReduced);
+    }
 
     await productsRepository.save(product);
 
