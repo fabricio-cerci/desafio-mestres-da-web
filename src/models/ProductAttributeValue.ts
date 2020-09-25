@@ -21,7 +21,7 @@ class ProductAttributeValue {
   @Column()
   product_attribute_id: string;
 
-  @ManyToOne(() => ProductAttribute)
+  @ManyToOne(() => ProductAttribute, { eager: true })
   @JoinColumn({ name: 'product_attribute_id' })
   product_attribute: ProductAttribute;
 
