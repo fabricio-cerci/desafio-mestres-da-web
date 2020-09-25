@@ -37,7 +37,17 @@ class AddProductToStockService {
 
     await productsToStockRepository.save(productsToStock);
 
-    return stock;
+    const updatedStock = await stocksRepository
+      .createQueryBuilder('stocks')
+      .leftJoinAndSelect('stocks.productToStocks', 'productToStocks')
+      .where(`id = '${stockId}'`)
+      .getOne();
+
+    if (!updatedStock) {
+      throw new AppError('Stock does not exist');
+    }
+
+    return updatedStock;
   }
 }
 
