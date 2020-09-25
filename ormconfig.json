@@ -1,0 +1,18 @@
+{
+  "type": "postgres",
+  "host": "localhost",
+  "port": 5432,
+  "username": "postgres",
+  "password": "docker",
+  "database": "desafio_mdw",
+  "entities": [
+    "./src/models/*.ts"
+  ],
+  "migrations": [
+    "./src/database/migrations/*.ts"
+  ],
+  "seeds": ["src/database/seeds/**/*{.ts,.js}"],
+  "cli": {
+    "migrationsDir": "./src/database/migrations"
+  }
+}
