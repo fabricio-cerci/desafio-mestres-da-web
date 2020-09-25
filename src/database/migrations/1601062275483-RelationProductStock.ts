@@ -48,7 +48,7 @@ export default class RelationProductStock21601062275483
         columnNames: ['productId'],
         referencedColumnNames: ['id'],
         referencedTableName: 'products',
-        onDelete: 'SET NULL',
+        onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       }),
     );
@@ -60,7 +60,7 @@ export default class RelationProductStock21601062275483
         columnNames: ['stockId'],
         referencedColumnNames: ['id'],
         referencedTableName: 'stocks',
-        onDelete: 'SET NULL',
+        onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       }),
     );
