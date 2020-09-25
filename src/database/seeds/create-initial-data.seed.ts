@@ -5,6 +5,8 @@ import Brand from '../../models/Brand';
 import ProductType from '../../models/ProductType';
 import ProductAttribute from '../../models/ProductAttribute';
 import ProductAttributeValue from '../../models/ProductAttributeValue';
+import User from '../../models/User';
+import Stock from '../../models/Stock';
 
 export default class CreateInitialData implements Seeder {
   public async run(factory: Factory, connection: Connection): Promise<any> {
@@ -120,6 +122,35 @@ export default class CreateInitialData implements Seeder {
         { value: 'M', product_attribute_id: productAttributeIds[9].id },
         { value: 'G', product_attribute_id: productAttributeIds[9].id },
         { value: 'GG', product_attribute_id: productAttributeIds[9].id },
+      ])
+      .execute();
+
+    await connection
+      .createQueryBuilder()
+      .insert()
+      .into(User)
+      .values([
+        {
+          name: 'Administrador',
+          email: 'admin@gmail.com',
+          password: 'admin123',
+          isAdmin: true,
+        },
+        { name: 'Usual user', email: 'user@gmail.com', password: 'user123' },
+      ])
+      .execute();
+
+    await connection
+      .createQueryBuilder()
+      .insert()
+      .into(Stock)
+      .values([
+        {
+          name: 'Estoque 1',
+        },
+        {
+          name: 'Estoque 2',
+        },
       ])
       .execute();
   }
