@@ -1,29 +1,45 @@
-import { getCustomRepository, getRepository } from 'typeorm';
+import { injectable, inject } from 'tsyringe';
 
 import AppError from '@shared/errors/AppError';
-import Product from '../infra/typeorm/entities/Product';
-import ProductsRepository from '../repositories/ProductsRepository';
-import ProductAttribute from '../infra/typeorm/entities/ProductAttribute';
-import ProductAttributeValue from '../infra/typeorm/entities/ProductAttributeValue';
-import ProductType from '../infra/typeorm/entities/ProductType';
-import Brand from '../infra/typeorm/entities/Brand';
 
-interface Attribute {
+import IProductsRepository from '@modules/products/repositories/IProductsRepository';
+import IProductTypesRepository from '@modules/products/repositories/IProductTypesRepository';
+import IBrandsRepository from '../repositories/IBrandsRepository';
+import IProductAttributesRepository from '../repositories/IProductAttributesRepository';
+import IProductAttributeValuesRepository from '../repositories/IProductAttributeValuesRepository';
+
+import Product from '../infra/typeorm/entities/Product';
+
+interface IAttribute {
   id: string;
   values_ids: string[];
 }
 
-interface Request {
+interface IRequest {
   name: string;
   sku: string;
   description?: string;
   price: number;
   product_type_id: string;
   brand_id: string;
-  attributes: Attribute[];
+  attributes: IAttribute[];
 }
 
+@injectable()
 class CreateProductService {
+  constructor(
+    @inject('ProductsRepository')
+    private productsRepository: IProductsRepository,
+    @inject('ProductTypesRepository')
+    private productTypesRepository: IProductTypesRepository,
+    @inject('BrandsRepository')
+    private brandsRepository: IBrandsRepository,
+    @inject('ProductAttributesRepository')
+    private productAttributesRepository: IProductAttributesRepository,
+    @inject('ProductAttributeValuesRepository')
+    private productAttributeValuesRepository: IProductAttributeValuesRepository,
+  ) {}
+
   public async execute({
     name,
     sku,
@@ -32,22 +48,14 @@ class CreateProductService {
     product_type_id,
     brand_id,
     attributes,
-  }: Request): Promise<Product> {
-    const productsRepository = getCustomRepository(ProductsRepository);
-    const productAttributesRepository = getRepository(ProductAttribute);
-    const productAttributeValuesRepository = getRepository(
-      ProductAttributeValue,
-    );
-    const productTypeRepository = getRepository(ProductType);
-    const brandRepository = getRepository(Brand);
-
-    const foundWithSameSku = await productsRepository.findBySku(sku);
+  }: IRequest): Promise<Product> {
+    const foundWithSameSku = await this.productsRepository.findBySku(sku);
 
     if (foundWithSameSku) {
       throw new AppError('This sku already exists');
     }
 
-    const existProductType = await productTypeRepository.findOne(
+    const existProductType = await this.productTypesRepository.findById(
       product_type_id,
     );
 
@@ -55,7 +63,7 @@ class CreateProductService {
       throw new AppError('Product Type does not exist');
     }
 
-    const existBrand = await brandRepository.findOne(brand_id);
+    const existBrand = await this.brandsRepository.findById(brand_id);
 
     if (!existBrand) {
       throw new AppError('Brand does not exist');
@@ -65,7 +73,7 @@ class CreateProductService {
       throw new AppError('Invalid price');
     }
 
-    const product = productsRepository.create({
+    let product = await this.productsRepository.create({
       name,
       sku,
       description,
@@ -76,7 +84,7 @@ class CreateProductService {
 
     if (attributes) {
       const attributesValuesPromise = attributes.map(async attribute => {
-        const attributeData = await productAttributesRepository.findOne(
+        const attributeData = await this.productAttributesRepository.findById(
           attribute.id,
         );
 
@@ -88,7 +96,7 @@ class CreateProductService {
           throw new AppError('Incorrect product type');
         }
 
-        const attributeValues = await productAttributeValuesRepository.findByIds(
+        const attributeValues = await this.productAttributeValuesRepository.findByIds(
           attribute.values_ids,
         );
 
@@ -105,10 +113,11 @@ class CreateProductService {
         arr.concat(e),
       );
 
-      product.productAttributeValues = attributesValuesReduced;
+      product = await this.productsRepository.saveAttributes({
+        product,
+        attributes: attributesValuesReduced,
+      });
     }
-
-    await productsRepository.save(product);
 
     return product;
   }
