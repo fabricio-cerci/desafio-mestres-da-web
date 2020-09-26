@@ -1,5 +1,6 @@
 import { Connection } from 'typeorm';
 import { Seeder, Factory } from 'typeorm-seeding';
+import { hash } from 'bcryptjs';
 
 import Brand from '@modules/products/infra/typeorm/entities/Brand';
 import ProductType from '@modules/products/infra/typeorm/entities/ProductType';
@@ -133,10 +134,14 @@ export default class CreateInitialData implements Seeder {
         {
           name: 'Administrador',
           email: 'admin@gmail.com',
-          password: 'admin123',
+          password: await hash('admin123', 8),
           isAdmin: true,
         },
-        { name: 'Usual user', email: 'user@gmail.com', password: 'user123' },
+        {
+          name: 'Usual user',
+          email: 'user@gmail.com',
+          password: await hash('user123', 8),
+        },
       ])
       .execute();
 
