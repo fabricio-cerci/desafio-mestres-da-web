@@ -5,7 +5,7 @@ import authConfig from '@config/auth';
 
 import AppError from '@shared/errors/AppError';
 
-interface TokenPayload {
+interface ITokenPayload {
   isAdmin: boolean;
   iat: number;
   exp: number;
@@ -28,7 +28,7 @@ export default function ensureAuthenticated(
   try {
     const decoded = verify(token, authConfig.jwt.secret);
 
-    const { sub, isAdmin } = decoded as TokenPayload;
+    const { sub, isAdmin } = decoded as ITokenPayload;
 
     request.user = { id: sub, isAdmin };
 
