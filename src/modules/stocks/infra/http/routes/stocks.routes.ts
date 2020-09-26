@@ -1,46 +1,21 @@
 import { Router } from 'express';
-import { getRepository } from 'typeorm';
 
-import AddProductToStockService from '@modules/stocks/services/AddProductToStockService';
-import Stock from '@modules/stocks/infra/typeorm/entities/Stock';
 import ensureAuthenticated from '@modules/users/infra/http/middlewares/ensureAuthenticated';
 import ensureIsAdmin from '@modules/users/infra/http/middlewares/ensureIsAdmin';
+import StocksController from '../controllers/StocksController';
+import StockProductsControllers from '../controllers/StockProductsController';
 
-const productsRouter = Router();
+const stocksRouter = Router();
+const stocksController = new StocksController();
+const stockProductsControllers = new StockProductsControllers();
 
-productsRouter.use(ensureAuthenticated);
-productsRouter.use(ensureIsAdmin);
+stocksRouter.use(ensureAuthenticated);
+stocksRouter.use(ensureIsAdmin);
 
-productsRouter.get('/', async (request, response) => {
-  const stocksRepository = getRepository(Stock);
-  const stocks = await stocksRepository.find();
+stocksRouter.get('/', stocksController.index);
 
-  return response.json(stocks);
-});
+stocksRouter.get('/:id/products', stockProductsControllers.show);
 
-productsRouter.get('/:id/products', async (request, response) => {
-  const { id } = request.params;
+stocksRouter.post('/:id/products', stockProductsControllers.create);
 
-  const stocksRepository = getRepository(Stock);
-  const stockWithProducts = await stocksRepository.findOne(id, {
-    relations: ['productToStocks'],
-  });
-
-  return response.json(stockWithProducts);
-});
-
-productsRouter.post('/:id/products', async (request, response) => {
-  const { productIds } = request.body;
-  const { id } = request.params;
-
-  const createProductService = new AddProductToStockService();
-
-  const stock = await createProductService.execute({
-    productIds,
-    stockId: id,
-  });
-
-  return response.json(stock);
-});
-
-export default productsRouter;
+export default stocksRouter;
