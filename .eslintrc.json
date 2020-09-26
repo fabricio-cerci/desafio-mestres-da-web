@@ -24,11 +24,24 @@
     ],
     "rules": {
       "prettier/prettier": "error",
+      "no-param-reassign": "off",
       "class-methods-use-this": "off",
+      "no-useless-constructor": "off",
       "@typescript-eslint/camelcase": "off",
       "@typescript-eslint/no-unused-vars": ["error", {
         "argsIgnorePattern": "_"
       }],
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          "selector": "interface",
+          "format": ["PascalCase"],
+          "custom": {
+            "regex": "^I[A-Z]",
+            "match": true
+          }
+        }
+      ],
       "camelcase": "off",
       "import/extensions": [
 	      "error",
