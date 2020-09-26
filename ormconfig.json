@@ -6,13 +6,13 @@
   "password": "docker",
   "database": "desafio_mdw",
   "entities": [
-    "./src/models/*.ts"
+    "./src/modules/*/infra/typeorm/entities/*.ts"
   ],
   "migrations": [
-    "./src/database/migrations/*.ts"
+    "./src/shared/infra/typeorm/migrations/*.ts"
   ],
-  "seeds": ["src/database/seeds/**/*{.ts,.js}"],
+  "seeds": ["./src/shared/infra/typeorm/seeds/**/*{.ts,.js}"],
   "cli": {
-    "migrationsDir": "./src/database/migrations"
+    "migrationsDir": "./src/shared/infra/typeorm/migrations"
   }
 }
