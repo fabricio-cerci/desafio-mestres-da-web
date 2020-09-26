@@ -1,19 +1,21 @@
-import { getCustomRepository, getRepository } from 'typeorm';
+import { injectable, inject } from 'tsyringe';
 
 import AppError from '@shared/errors/AppError';
-import Product from '../infra/typeorm/entities/Product';
-import ProductsRepository from '../repositories/ProductsRepository';
-import ProductAttribute from '../infra/typeorm/entities/ProductAttribute';
-import ProductAttributeValue from '../infra/typeorm/entities/ProductAttributeValue';
-import ProductType from '../infra/typeorm/entities/ProductType';
-import Brand from '../infra/typeorm/entities/Brand';
 
-interface Attribute {
+import IProductsRepository from '@modules/products/repositories/IProductsRepository';
+import IProductTypesRepository from '@modules/products/repositories/IProductTypesRepository';
+import IBrandsRepository from '../repositories/IBrandsRepository';
+import IProductAttributesRepository from '../repositories/IProductAttributesRepository';
+import IProductAttributeValuesRepository from '../repositories/IProductAttributeValuesRepository';
+
+import Product from '../infra/typeorm/entities/Product';
+
+interface IAttribute {
   id: string;
   values_ids: string[];
 }
 
-interface Request {
+interface IRequest {
   name?: string;
   sku?: string;
   description?: string;
@@ -21,10 +23,24 @@ interface Request {
   product_type_id?: string;
   brand_id?: string;
   productId: string;
-  attributes?: Attribute[];
+  attributes?: IAttribute[];
 }
 
+@injectable()
 class UpdateProductService {
+  constructor(
+    @inject('ProductsRepository')
+    private productsRepository: IProductsRepository,
+    @inject('ProductTypesRepository')
+    private productTypesRepository: IProductTypesRepository,
+    @inject('BrandsRepository')
+    private brandsRepository: IBrandsRepository,
+    @inject('ProductAttributesRepository')
+    private productAttributesRepository: IProductAttributesRepository,
+    @inject('ProductAttributeValuesRepository')
+    private productAttributeValuesRepository: IProductAttributeValuesRepository,
+  ) {}
+
   public async execute({
     name,
     sku,
@@ -34,16 +50,8 @@ class UpdateProductService {
     productId,
     brand_id,
     attributes,
-  }: Request): Promise<Product> {
-    const productsRepository = getCustomRepository(ProductsRepository);
-    const productAttributesRepository = getRepository(ProductAttribute);
-    const productAttributeValuesRepository = getRepository(
-      ProductAttributeValue,
-    );
-    const productTypeRepository = getRepository(ProductType);
-    const brandRepository = getRepository(Brand);
-
-    const product = await productsRepository.findOne(productId, {
+  }: IRequest): Promise<Product> {
+    let product = await this.productsRepository.findById(productId, {
       relations: ['product_type', 'productAttributeValues'],
     });
 
@@ -56,7 +64,7 @@ class UpdateProductService {
     }
 
     if (sku) {
-      const foundWithSameSku = await productsRepository.findBySku(sku);
+      const foundWithSameSku = await this.productsRepository.findBySku(sku);
 
       if (foundWithSameSku) {
         throw new AppError('This sku already exists');
@@ -70,7 +78,7 @@ class UpdateProductService {
     }
 
     if (product_type_id) {
-      const existProductType = await productTypeRepository.findOne(
+      const existProductType = await this.productTypesRepository.findById(
         product_type_id,
       );
 
@@ -82,7 +90,7 @@ class UpdateProductService {
     }
 
     if (brand_id) {
-      const existBrand = await brandRepository.findOne(brand_id);
+      const existBrand = await this.brandsRepository.findById(brand_id);
 
       if (!existBrand) {
         throw new AppError('Brand does not exist');
@@ -101,7 +109,7 @@ class UpdateProductService {
 
     if (attributes) {
       const attributesValuesPromise = attributes.map(async attribute => {
-        const attributeData = await productAttributesRepository.findOne(
+        const attributeData = await this.productAttributesRepository.findById(
           attribute.id,
         );
 
@@ -109,11 +117,11 @@ class UpdateProductService {
           throw new AppError('Invalid attribute');
         }
 
-        if (product.product_type_id !== attributeData.product_type_id) {
+        if (product?.product_type_id !== attributeData.product_type_id) {
           throw new AppError('Incorrect product type');
         }
 
-        const attributeValues = await productAttributeValuesRepository.findByIds(
+        const attributeValues = await this.productAttributeValuesRepository.findByIds(
           attribute.values_ids,
         );
 
@@ -130,10 +138,11 @@ class UpdateProductService {
         arr.concat(e),
       );
 
-      product.productAttributeValues = attributesValuesReduced;
+      product = await this.productsRepository.saveAttributes({
+        product,
+        attributes: attributesValuesReduced,
+      });
     }
-
-    await productsRepository.save(product);
 
     return product;
   }
