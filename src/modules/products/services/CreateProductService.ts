@@ -22,7 +22,7 @@ interface IRequest {
   price: number;
   product_type_id: string;
   brand_id: string;
-  attributes: IAttribute[];
+  attributes?: IAttribute[];
 }
 
 @injectable()
@@ -82,7 +82,7 @@ class CreateProductService {
       brand_id,
     });
 
-    if (attributes) {
+    if (attributes && attributes.length > 0) {
       const attributesValuesPromise = attributes.map(async attribute => {
         const attributeData = await this.productAttributesRepository.findById(
           attribute.id,
@@ -100,8 +100,8 @@ class CreateProductService {
           attribute.values_ids,
         );
 
-        if (!attributeValues) {
-          throw new AppError('Incorrect attribute value');
+        if (!attributeValues || attributeValues.length === 0) {
+          throw new AppError('Incorrect or empty attribute value');
         }
 
         return attributeValues;

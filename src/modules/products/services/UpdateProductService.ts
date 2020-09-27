@@ -107,7 +107,7 @@ class UpdateProductService {
       product.price = price;
     }
 
-    if (attributes) {
+    if (attributes && attributes.length > 0) {
       const attributesValuesPromise = attributes.map(async attribute => {
         const attributeData = await this.productAttributesRepository.findById(
           attribute.id,
@@ -125,8 +125,8 @@ class UpdateProductService {
           attribute.values_ids,
         );
 
-        if (!attributeValues) {
-          throw new AppError('Incorrect attribute value');
+        if (!attributeValues || attributeValues.length === 0) {
+          throw new AppError('Incorrect or empty  attribute value');
         }
 
         return attributeValues;
