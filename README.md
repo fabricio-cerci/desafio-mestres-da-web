@@ -75,6 +75,12 @@ Com o foco no back-end acabei optando por não desenvolver um front-end, para de
 
 Link: http://www.mediafire.com/file/fvnjezvdn8axqhh/Insomnia_2020-09-27.json/file
 
+### Variáveis ambiente
+
+Segue no link como estão as variáveis ambientes do insomnia.
+
+Link: https://ibb.co/17LM0rR
+
 ## Guia API
 
 Para realizar os testes na api's eu criei um seed onde ele já traz vários dados pré dispostos para se realizar os testes, vou passar aqui por cada endpoint explicando como funciona e o que é necessário para funcionar.
