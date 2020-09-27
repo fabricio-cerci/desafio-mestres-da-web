@@ -4,7 +4,7 @@ Desafio realizado para a vaga de Back-end no Mestres da Web
 
 ## Agradecimentos
 
-Antes de mais nada queria agradecer a equipe do Mestres da Web pela oportunidade oferecida para concorrer a essa vaga, muito obrigado mesmo.
+Antes, gostaria de agradecer a equipe do Mestres da Web pela oportunidade oferecida para concorrer a essa vaga, muito obrigado mesmo.
 
 ## Descrição do desafio
 Com o atual cenário da pandemia, as empresas de todos os seguimentos tiveram que acelerar seu processo tecnológico, afim de continuar entregando valor para seu consumidor. 
@@ -23,7 +23,7 @@ Como exemplo o banco utilizado foi o PostgreSQL, mas qualquer outro banco de dad
 
 ## Modelagem banco de dados
 
-A modelagem do banco de dados foi feita de maneira que fosse a mais dinâmica possível possibilitando com que o sistema escale de maneira tranquila. Possibilitando criações de tipos de produtos e atributos com seus valores de acordo com a necessidade do cliente. Também possibilita que se possa ter mais de um estoque caso necessário.
+A modelagem do banco de dados foi feita de maneira que fosse a mais dinâmica possível, fazendo com que o sistema escale de maneira inteligente. Com isso, possibilitando criações de tipos de produtos e atributos com seus valores de acordo com a necessidade do cliente. Também possibilita que se possa ter mais de um estoque caso necessário.
 
 Modelagem: https://ibb.co/8r8kStM
 
@@ -36,6 +36,18 @@ Os teste podem ser rodados utilizando o comando ```yarn test ou npm run test```,
 Os arquivos do coverage ficam na pasta coverage na raiz do projeto, abrindo o index.html você terá todo um relatório dos testes rodados.
 
 Test coverage: https://ibb.co/d0fVkK1
+
+## Tecnologias utilizadas
+
+- Node.js
+- Express
+- PostgreSQL
+- TypeScript
+- TypeORM
+- Jest
+- uuid
+- bcryptjs
+- jsonwebtoken (JWT)
 
 ## Instalação
 
@@ -219,3 +231,10 @@ Adiciona um ou mais produtos no estoque.
 }````
 
 *O atributo productIds só precisa de ids validos de produtos para cadastrar no estoque especificado.*
+
+## Possíveis Mudanças
+
+Aqui colocarei algumas mudanças que queria realizar, mas pelo tempo que possuía não foi possível realizar.
+
+- Possibilitar na modelagem de banco que um produto possa ter mais de um tipo.
+- Abstrair as entidades ligadas ao typeORM.
