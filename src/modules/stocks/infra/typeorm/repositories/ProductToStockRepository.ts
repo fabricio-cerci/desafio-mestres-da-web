@@ -12,8 +12,12 @@ class ProductToStockRepository implements IProductToStockRepository {
     this.ormRepository = getRepository(ProductToStock);
   }
 
-  public async save(data: IAddProductToStockDTO[]): Promise<void> {
-    await this.ormRepository.save(data);
+  public async save(
+    data: IAddProductToStockDTO[],
+  ): Promise<(IAddProductToStockDTO & ProductToStock)[]> {
+    const productToStock = await this.ormRepository.save(data);
+
+    return productToStock;
   }
 }
 
