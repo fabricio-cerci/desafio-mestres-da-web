@@ -2,10 +2,11 @@ import { inject, injectable } from 'tsyringe';
 
 import IProductsRepository from '@modules/products/repositories/IProductsRepository';
 import AppError from '@shared/errors/AppError';
+import ProductToStock from '@modules/products/infra/typeorm/entities/ProductToStock';
 import IStocksRepository from '../repositories/IStocksRepository';
 import IProductToStockRepository from '../repositories/IProductToStockRepository';
 
-import Stock from '../infra/typeorm/entities/Stock';
+import IAddProductToStockDTO from '../dtos/IAddProductToStockDTO';
 
 interface IRequest {
   productIds: string[];
@@ -23,7 +24,10 @@ class AddProductToStockService {
     private productToStockRepository: IProductToStockRepository,
   ) {}
 
-  public async execute({ productIds, stockId }: IRequest): Promise<Stock> {
+  public async execute({
+    productIds,
+    stockId,
+  }: IRequest): Promise<(IAddProductToStockDTO & ProductToStock)[]> {
     const stock = await this.stocksRepository.findById(stockId);
 
     if (!stock) {
@@ -42,15 +46,11 @@ class AddProductToStockService {
 
     const productsToStock = await Promise.all(productIdsPromise);
 
-    await this.productToStockRepository.save(productsToStock);
+    const productToStock = await this.productToStockRepository.save(
+      productsToStock,
+    );
 
-    const updatedStock = await this.stocksRepository.findById(stockId);
-
-    if (!updatedStock) {
-      throw new AppError('Stock does not exist');
-    }
-
-    return updatedStock;
+    return productToStock;
   }
 }
 
